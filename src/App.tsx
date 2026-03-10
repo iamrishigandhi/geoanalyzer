@@ -4,10 +4,10 @@ import Model from "./Model";
 import { useState } from "react";
 
 export default function App() {
-    const [wireframe, setWireframe] = useState(false);
+    const [wireframe, setWireframe] = useState(true);
     const [stats, setStats] = useState({ vertices: 0, triangles: 0 });
-    const [color, setColor] = useState("white");
-    const [backgroundColor, setBackgroundColor] = useState("#061235");
+    const [color, setColor] = useState("#000CB3");
+    const [backgroundColor, setBackgroundColor] = useState("#000000");
 
     return (
         <div style={{ display: "flex", width: "100vw", height: "100vh" }}>

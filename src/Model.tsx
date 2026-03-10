@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { Edges, Text, Line } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 
 function CenterLines({ color }: { color: string }) {
     const lines = useMemo(() => {
@@ -60,6 +61,12 @@ export default function Model({
             );
         }
     }, [color]);
+
+    useFrame((_state, delta) => {
+        if (meshRef.current) {
+            meshRef.current.rotation.y += delta;
+        }
+    });
 
     return (
         <group>
