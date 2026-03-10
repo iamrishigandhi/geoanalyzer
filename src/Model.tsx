@@ -1,81 +1,81 @@
-// src/Model.tsx
-import { useGLTF, Html } from "@react-three/drei";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { Edges, Text, Line } from "@react-three/drei";
 
-export default function Model({ url }: { url: string }) {
-    const { scene } = useGLTF(url);
-    const [wireframe, setWireframe] = useState(false);
-    const [stats, setStats] = useState({ vertices: 0, triangles: 0 });
-
-    useEffect(() => {
-        let totalVertices = 0;
-        let totalTriangles = 0;
-
-        scene.traverse((child) => {
-            if ((child as THREE.Mesh).isMesh) {
-                const mesh = child as THREE.Mesh;
-                const geometry = mesh.geometry as THREE.BufferGeometry;
-
-                totalVertices += geometry.attributes.position.count;
-                totalTriangles += geometry.attributes.position.count / 3;
-
-                if (mesh.material) {
-                    (mesh.material as THREE.MeshStandardMaterial).color.set(
-                        "red",
-                    );
-                }
-            }
-        });
-
-        setStats({ vertices: totalVertices, triangles: totalTriangles });
-    }, [scene]);
-
-    useEffect(() => {
-        scene.traverse((child) => {
-            if ((child as THREE.Mesh).isMesh) {
-                const mesh = child as THREE.Mesh;
-                if (mesh.material) {
-                    (mesh.material as THREE.MeshStandardMaterial).wireframe =
-                        wireframe;
-                }
-            }
-        });
-    }, [wireframe, scene]);
+function CenterLines({ color }: { color: string }) {
+    const lines = useMemo(() => {
+        const points = [
+            [new THREE.Vector3(-1, 1, 0), new THREE.Vector3(1, 1, 0)],
+            [new THREE.Vector3(-1, -1, 0), new THREE.Vector3(1, -1, 0)],
+            [new THREE.Vector3(0, -1, 1), new THREE.Vector3(0, 1, 1)],
+            [new THREE.Vector3(0, -1, -1), new THREE.Vector3(0, 1, -1)],
+            [new THREE.Vector3(1, 0, -1), new THREE.Vector3(1, 0, 1)],
+            [new THREE.Vector3(-1, 0, -1), new THREE.Vector3(-1, 0, 1)],
+        ];
+        return points;
+    }, []);
 
     return (
-        <>
-            <primitive object={scene} />
+        <group>
+            {lines.map((segment, i) => (
+                <Line key={i} points={segment} color={color} lineWidth={15} />
+            ))}
+        </group>
+    );
+}
 
-            <Html position={[0, 2, 0]}>
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "4px",
-                    }}
-                >
-                    <button
-                        onClick={() => setWireframe(!wireframe)}
-                        style={{ padding: "6px 12px", fontSize: "14px" }}
-                    >
-                        Toggle Wireframe
-                    </button>
+export default function Model({
+    wireframe,
+    onStatsChange,
+    color,
+    backgroundColor,
+}: {
+    wireframe: boolean;
+    onStatsChange: (stats: { vertices: number; triangles: number }) => void;
+    color: string;
+    backgroundColor: string;
+}) {
+    const meshRef = useRef<THREE.Mesh>(null!);
 
-                    <div
-                        style={{
-                            background: "rgba(0,0,0,0.6)",
-                            color: "white",
-                            padding: "4px 8px",
-                            fontSize: "12px",
-                            borderRadius: "4px",
-                        }}
-                    >
-                        <div>Vertices: {stats.vertices}</div>
-                        <div>Triangles: {stats.triangles}</div>
-                    </div>
-                </div>
-            </Html>
-        </>
+    const geometry = useMemo(() => new THREE.BoxGeometry(2, 2, 2), []);
+
+    useEffect(() => {
+        if (meshRef.current) {
+            const geo = meshRef.current.geometry;
+            const totalVertices = geo.attributes.position.count;
+            const totalTriangles = geo.index
+                ? geo.index.count / 3
+                : totalVertices / 3;
+            onStatsChange({
+                vertices: totalVertices,
+                triangles: Math.round(totalTriangles),
+            });
+        }
+    }, [geometry, onStatsChange]);
+
+    useEffect(() => {
+        if (meshRef.current) {
+            (meshRef.current.material as THREE.MeshStandardMaterial).color.set(
+                color,
+            );
+        }
+    }, [color]);
+
+    return (
+        <group>
+            <mesh ref={meshRef} geometry={geometry}>
+                <meshStandardMaterial
+                    color={color}
+                    roughness={0.4}
+                    metalness={0.05}
+                />
+                {wireframe && (
+                    <>
+                        <Edges color={backgroundColor} lineWidth={15} />
+                        <CenterLines color={backgroundColor} />
+                    </>
+                )}
+            </mesh>
+        </group>
     );
 }
