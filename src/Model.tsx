@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { Edges, Text, Line } from "@react-three/drei";
+import { Edges, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
 function CenterLines({ color }: { color: string }) {
@@ -29,12 +29,10 @@ export default function Model({
     wireframe,
     onStatsChange,
     color,
-    backgroundColor,
 }: {
     wireframe: boolean;
     onStatsChange: (stats: { vertices: number; triangles: number }) => void;
     color: string;
-    backgroundColor: string;
 }) {
     const meshRef = useRef<THREE.Mesh>(null!);
 
@@ -73,13 +71,13 @@ export default function Model({
             <mesh ref={meshRef} geometry={geometry}>
                 <meshStandardMaterial
                     color={color}
-                    roughness={0.4}
-                    metalness={0.05}
+                    roughness={0.35}
+                    metalness={0.15}
                 />
                 {wireframe && (
                     <>
-                        <Edges color={backgroundColor} lineWidth={15} />
-                        <CenterLines color={backgroundColor} />
+                        <Edges color="white" lineWidth={15} />
+                        <CenterLines color="white" />
                     </>
                 )}
             </mesh>
