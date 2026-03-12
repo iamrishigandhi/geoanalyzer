@@ -1,5 +1,5 @@
 import { useState } from "react";
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export default function CommentThread({
     comment,
@@ -27,7 +27,8 @@ export default function CommentThread({
             <h3>Comment #{comment.id}</h3>
             <p>
                 Location: ({comment.position.x.toFixed(2)},{" "}
-                {comment.position.y.toFixed(2)}, {comment.position.z.toFixed(2)})
+                {comment.position.y.toFixed(2)}, {comment.position.z.toFixed(2)}
+                )
             </p>
             <div>
                 {comment.messages.map((message, index) => (

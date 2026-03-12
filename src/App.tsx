@@ -13,10 +13,17 @@ import { Point } from "./Points";
 type Measurement = {
     id: number;
 } & (
-    | { type: 'distance'; points: [THREE.Vector3, THREE.Vector3]; distance: number }
-    | { type: 'angle'; points: [THREE.Vector3, THREE.Vector3, THREE.Vector3]; angle: number }
+    | {
+          type: "distance";
+          points: [THREE.Vector3, THREE.Vector3];
+          distance: number;
+      }
+    | {
+          type: "angle";
+          points: [THREE.Vector3, THREE.Vector3, THREE.Vector3];
+          angle: number;
+      }
 );
-
 
 export default function App() {
     const [wireframe, setWireframe] = useState(true);
@@ -38,34 +45,59 @@ export default function App() {
         }[]
     >([]);
     const [selectedComment, setSelectedComment] = useState<number | null>(null);
-    const [activeTool, setActiveTool] = useState<'none' | 'distance' | 'angle' | 'comment'>('none');
+    const [activeTool, setActiveTool] = useState<
+        "none" | "distance" | "angle" | "comment"
+    >("none");
     const [points, setPoints] = useState<THREE.Vector3[]>([]);
     const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
-    const handleAddComment = (position: THREE.Vector3, normal: THREE.Vector3) => {
-        if (activeTool === 'distance') {
+    const handleAddComment = (
+        position: THREE.Vector3,
+        normal: THREE.Vector3,
+    ) => {
+        if (activeTool === "distance") {
             const newPoints = [...points, position];
             if (newPoints.length === 2) {
                 const distance = newPoints[0].distanceTo(newPoints[1]);
-                setMeasurements([...measurements, { id: measurements.length + 1, type: 'distance', points: newPoints as [THREE.Vector3, THREE.Vector3], distance }]);
+                setMeasurements([
+                    ...measurements,
+                    {
+                        id: measurements.length + 1,
+                        type: "distance",
+                        points: newPoints as [THREE.Vector3, THREE.Vector3],
+                        distance,
+                    },
+                ]);
                 setPoints([]);
-                setActiveTool('none');
+                setActiveTool("none");
             } else {
                 setPoints(newPoints);
             }
-        } else if (activeTool === 'angle') {
+        } else if (activeTool === "angle") {
             const newPoints = [...points, position];
             if (newPoints.length === 3) {
                 const v1 = newPoints[0].clone().sub(newPoints[1]).normalize();
                 const v2 = newPoints[2].clone().sub(newPoints[1]).normalize();
                 const angle = v1.angleTo(v2) * (180 / Math.PI);
-                setMeasurements([...measurements, { id: measurements.length + 1, type: 'angle', points: newPoints as [THREE.Vector3, THREE.Vector3, THREE.Vector3], angle }]);
+                setMeasurements([
+                    ...measurements,
+                    {
+                        id: measurements.length + 1,
+                        type: "angle",
+                        points: newPoints as [
+                            THREE.Vector3,
+                            THREE.Vector3,
+                            THREE.Vector3,
+                        ],
+                        angle,
+                    },
+                ]);
                 setPoints([]);
-                setActiveTool('none');
+                setActiveTool("none");
             } else {
                 setPoints(newPoints);
             }
-        } else if (activeTool === 'comment') {
+        } else if (activeTool === "comment") {
             const newComment = {
                 id: comments.length + 1,
                 position,
@@ -74,7 +106,7 @@ export default function App() {
             };
             setComments([...comments, newComment]);
             setSelectedComment(newComment.id);
-            setActiveTool('none');
+            setActiveTool("none");
         }
     };
 
@@ -99,7 +131,19 @@ export default function App() {
         <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
             {/* 3D VIEW AREA */}
             <div style={{ flex: 3, position: "relative" }}>
-                <div style={{ position: 'absolute', top: 10, left: 10, color: 'white', zIndex: 2, fontWeight: 'bold', fontSize: '2em' }}>COLAB</div>
+                <div
+                    style={{
+                        position: "absolute",
+                        top: 10,
+                        left: 10,
+                        color: "white",
+                        zIndex: 2,
+                        fontWeight: "bold",
+                        fontSize: "2em",
+                    }}
+                >
+                    COLAB
+                </div>
                 {/* FloatingLines Background */}
                 <div
                     style={{
@@ -131,7 +175,10 @@ export default function App() {
                     }}
                 >
                     <ambientLight intensity={lightIntensity} />
-                    <directionalLight position={[5, 5, 5]} intensity={lightIntensity * 2.66} />
+                    <directionalLight
+                        position={[5, 5, 5]}
+                        intensity={lightIntensity * 2.66}
+                    />
 
                     <Model
                         wireframe={wireframe}
@@ -160,11 +207,23 @@ export default function App() {
                     ))}
 
                     {measurements.map((measurement) => {
-                        if (measurement.type === 'distance') {
-                            return <DistanceMeasurement key={measurement.id} points={measurement.points} distance={measurement.distance} />;
+                        if (measurement.type === "distance") {
+                            return (
+                                <DistanceMeasurement
+                                    key={measurement.id}
+                                    points={measurement.points}
+                                    distance={measurement.distance}
+                                />
+                            );
                         }
-                        if (measurement.type === 'angle') {
-                            return <AngleMeasurement key={measurement.id} points={measurement.points} angle={measurement.angle} />;
+                        if (measurement.type === "angle") {
+                            return (
+                                <AngleMeasurement
+                                    key={measurement.id}
+                                    points={measurement.points}
+                                    angle={measurement.angle}
+                                />
+                            );
                         }
                         return null;
                     })}
@@ -188,13 +247,13 @@ export default function App() {
                 <button
                     onClick={() => setWireframe(!wireframe)}
                     style={{
-                        padding: '6px 12px',
-                        fontSize: '14px',
-                        backgroundColor: '#333',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
+                        padding: "6px 12px",
+                        fontSize: "14px",
+                        backgroundColor: "#333",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
                     }}
                 >
                     Toggle Wireframe
@@ -216,13 +275,13 @@ export default function App() {
                     <button
                         onClick={() => setRotateX(!rotateX)}
                         style={{
-                            padding: '6px 12px',
-                            fontSize: '14px',
-                            backgroundColor: rotateX ? '#007bff' : '#333',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
+                            padding: "6px 12px",
+                            fontSize: "14px",
+                            backgroundColor: rotateX ? "#007bff" : "#333",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
                         }}
                     >
                         Toggle X Rotation ({rotateX ? "On" : "Off"})
@@ -241,13 +300,13 @@ export default function App() {
                     <button
                         onClick={() => setRotateY(!rotateY)}
                         style={{
-                            padding: '6px 12px',
-                            fontSize: '14px',
-                            backgroundColor: rotateY ? '#007bff' : '#333',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
+                            padding: "6px 12px",
+                            fontSize: "14px",
+                            backgroundColor: rotateY ? "#007bff" : "#333",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
                         }}
                     >
                         Toggle Y Rotation ({rotateY ? "On" : "Off"})
@@ -266,13 +325,13 @@ export default function App() {
                     <button
                         onClick={() => setRotateZ(!rotateZ)}
                         style={{
-                            padding: '6px 12px',
-                            fontSize: '14px',
-                            backgroundColor: rotateZ ? '#007bff' : '#333',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
+                            padding: "6px 12px",
+                            fontSize: "14px",
+                            backgroundColor: rotateZ ? "#007bff" : "#333",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
                         }}
                     >
                         Toggle Z Rotation ({rotateZ ? "On" : "Off"})
@@ -297,7 +356,9 @@ export default function App() {
                         max="10"
                         step="0.1"
                         value={lightIntensity}
-                        onChange={(e) => setLightIntensity(parseFloat(e.target.value))}
+                        onChange={(e) =>
+                            setLightIntensity(parseFloat(e.target.value))
+                        }
                     />
                     <span>{lightIntensity}</span>
                 </div>
@@ -312,19 +373,24 @@ export default function App() {
                 <div style={{ marginTop: "20px" }}>
                     <h3>Comments</h3>
                     <button
-                        onClick={() => setActiveTool(activeTool === 'comment' ? 'none' : 'comment')}
+                        onClick={() =>
+                            setActiveTool(
+                                activeTool === "comment" ? "none" : "comment",
+                            )
+                        }
                         style={{
-                            padding: '6px 12px',
-                            fontSize: '14px',
-                            backgroundColor: activeTool === 'comment' ? '#007bff' : '#333',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            marginBottom: '10px',
+                            padding: "6px 12px",
+                            fontSize: "14px",
+                            backgroundColor:
+                                activeTool === "comment" ? "#007bff" : "#333",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            marginBottom: "10px",
                         }}
                     >
-                        {activeTool === 'comment' ? 'Cancel' : 'Add Comment'}
+                        {activeTool === "comment" ? "Cancel" : "Add Comment"}
                     </button>
                     {comments.map((comment) => (
                         <div key={comment.id} style={{ marginBottom: "10px" }}>
@@ -337,14 +403,14 @@ export default function App() {
                             <button
                                 onClick={() => handleDeleteComment(comment.id)}
                                 style={{
-                                    padding: '6px 12px',
-                                    fontSize: '14px',
-                                    backgroundColor: '#dc3545',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    marginLeft: '10px',
+                                    padding: "6px 12px",
+                                    fontSize: "14px",
+                                    backgroundColor: "#dc3545",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    marginLeft: "10px",
                                 }}
                             >
                                 Delete
@@ -355,7 +421,9 @@ export default function App() {
 
                 {selectedComment && (
                     <CommentThread
-                        comment={comments.find((c) => c.id === selectedComment)!}
+                        comment={
+                            comments.find((c) => c.id === selectedComment)!
+                        }
                         onAddComment={handleAddMessage}
                     />
                 )}
