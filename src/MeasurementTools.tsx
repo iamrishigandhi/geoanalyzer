@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface MeasurementToolsProps {
     activeTool: 'none' | 'distance' | 'angle' | 'comment';
     onToolChange: (tool: 'none' | 'distance' | 'angle' | 'comment') => void;
