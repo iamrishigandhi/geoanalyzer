@@ -82,7 +82,7 @@ export default function App() {
 
                 {/* Three.js Canvas */}
                 <Canvas
-                    camera={{ position: [3, 3, 3] }}
+                    camera={{ position: [3, 2, 3] }}
                     style={{
                         position: "absolute",
                         inset: 0,
@@ -91,7 +91,7 @@ export default function App() {
                     }}
                 >
                     <ambientLight intensity={lightIntensity} />
-                    <directionalLight position={[5, 5, 5]} intensity={lightIntensity * 2.66} />
+                    <directionalLight position={[5, 5, 5]} intensity={lightIntensity * 3} />
 
                     <Model
                         wireframe={wireframe}
