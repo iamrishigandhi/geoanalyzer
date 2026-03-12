@@ -11,7 +11,7 @@ export default function App() {
     const [wireframe, setWireframe] = useState(true);
     const [color, setColor] = useState("#000CB3");
     const [rotateX, setRotateX] = useState(false);
-    const [rotateY, setRotateY] = useState(true);
+    const [rotateY, setRotateY] = useState(false);
     const [rotateZ, setRotateZ] = useState(false);
     const [speedX, setSpeedX] = useState(1);
     const [speedY, setSpeedY] = useState(1);

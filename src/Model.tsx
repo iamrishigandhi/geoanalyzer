@@ -19,7 +19,7 @@ function CenterLines({ color }: { color: string }) {
     return (
         <group>
             {lines.map((segment, i) => (
-                <Line key={i} points={segment} color={color} lineWidth={15} />
+                <Line key={i} points={segment} color={color} lineWidth={20} />
             ))}
         </group>
     );
@@ -90,7 +90,7 @@ export default function Model({
                 />
                 {wireframe && (
                     <>
-                        <Edges color="black" lineWidth={15} />
+                        <Edges color="black" lineWidth={20} />
                         <CenterLines color="black" />
                     </>
                 )}
