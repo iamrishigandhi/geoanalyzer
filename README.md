@@ -5,19 +5,19 @@ GeoAnalyzer is an interactive 3D model viewer with features for collaboration an
 ## Features
 
 - **3D Model Viewer:** Render and interact with 3D models in the browser.
-  - **Wireframe Mode:** Toggle between solid and wireframe rendering.
-  - **Color Picker:** Change the color of the 3D model.
+    - **Wireframe Mode:** Toggle between solid and wireframe rendering.
+    - **Color Picker:** Change the color of the 3D model.
 - **Model Rotation:**
-  - Independently rotate the model on the X, Y, and Z axes.
-  - Control the speed of rotation for each axis.
+    - Independently rotate the model on the X, Y, and Z axes.
+    - Control the speed of rotation for each axis.
 - **Lighting Control:** Adjust the intensity of the ambient and directional lights in the scene.
 - **Commenting System:**
-  - Place comment markers on the 3D model.
-  - Add messages to comment threads.
-  - Delete comments.
+    - Place comment markers on the 3D model.
+    - Add messages to comment threads.
+    - Delete comments.
 - **Measurement Tools:**
-  - **Distance Measurement:** Measure the distance between two points on the model.
-  - **Angle Measurement:** Measure the angle formed by three points on the model.
+    - **Distance Measurement:** Measure the distance between two points on the model.
+    - **Angle Measurement:** Measure the angle formed by three points on the model.
 - **Interactive Background:** An animated background of floating lines that responds to mouse movement.
 
 ## Skills Demonstrated
