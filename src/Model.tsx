@@ -34,6 +34,7 @@ export default function Model({
     speedX,
     speedY,
     speedZ,
+    onAddComment,
 }: {
     wireframe: boolean;
     color: string;
@@ -43,6 +44,7 @@ export default function Model({
     speedX: number;
     speedY: number;
     speedZ: number;
+    onAddComment: (position: THREE.Vector3, normal: THREE.Vector3) => void;
 }) {
     const meshRef = useRef<THREE.Mesh>(null!);
 
@@ -70,9 +72,17 @@ export default function Model({
         }
     });
 
+    const handleClick = (event: any) => {
+        if (event.face) {
+            const position = event.point;
+            const normal = event.face.normal;
+            onAddComment(position, normal);
+        }
+    };
+
     return (
         <group>
-            <mesh ref={meshRef} geometry={geometry}>
+            <mesh ref={meshRef} geometry={geometry} onClick={handleClick}>
                 <meshStandardMaterial
                     color={color}
                     roughness={0.35}

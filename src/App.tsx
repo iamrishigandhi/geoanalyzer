@@ -3,6 +3,9 @@ import { OrbitControls } from "@react-three/drei";
 import Model from "./Model";
 import FloatingLines from "./FloatingLines";
 import { useState } from "react";
+import * as THREE from "three";
+import CommentMarker from "./CommentMarker";
+import CommentThread from "./CommentThread";
 
 export default function App() {
     const [wireframe, setWireframe] = useState(true);
@@ -14,6 +17,44 @@ export default function App() {
     const [speedY, setSpeedY] = useState(1);
     const [speedZ, setSpeedZ] = useState(1);
     const [lightIntensity, setLightIntensity] = useState(1.5);
+
+    const [comments, setComments] = useState<
+        {
+            id: number;
+            position: THREE.Vector3;
+            normal: THREE.Vector3;
+            messages: string[];
+        }[]
+    >([]);
+    const [selectedComment, setSelectedComment] = useState<number | null>(null);
+
+    const handleAddComment = (position: THREE.Vector3, normal: THREE.Vector3) => {
+        const newComment = {
+            id: comments.length + 1,
+            position,
+            normal,
+            messages: [],
+        };
+        setComments([...comments, newComment]);
+        setSelectedComment(newComment.id);
+    };
+
+    const handleAddMessage = (commentId: number, message: string) => {
+        setComments(
+            comments.map((comment) =>
+                comment.id === commentId
+                    ? { ...comment, messages: [...comment.messages, message] }
+                    : comment,
+            ),
+        );
+    };
+
+    const handleDeleteComment = (commentId: number) => {
+        setComments(comments.filter((comment) => comment.id !== commentId));
+        if (selectedComment === commentId) {
+            setSelectedComment(null);
+        }
+    };
 
     return (
         <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
@@ -61,7 +102,18 @@ export default function App() {
                         speedX={speedX}
                         speedY={speedY}
                         speedZ={speedZ}
+                        onAddComment={handleAddComment}
                     />
+
+                    {comments.map((comment) => (
+                        <CommentMarker
+                            key={comment.id}
+                            position={comment.position}
+                            normal={comment.normal}
+                            number={comment.id}
+                            onClick={() => setSelectedComment(comment.id)}
+                        />
+                    ))}
 
                     <OrbitControls />
                 </Canvas>
@@ -74,6 +126,7 @@ export default function App() {
                     padding: "20px",
                     background: "#111",
                     color: "white",
+                    overflowY: "auto",
                 }}
             >
                 <h2>Controls</h2>
@@ -153,6 +206,32 @@ export default function App() {
                     />
                     <span>{lightIntensity}</span>
                 </div>
+                <div style={{ marginTop: "20px" }}>
+                    <h3>Comments</h3>
+                    {comments.map((comment) => (
+                        <div key={comment.id} style={{ marginBottom: "10px" }}>
+                            <span
+                                style={{ cursor: "pointer" }}
+                                onClick={() => setSelectedComment(comment.id)}
+                            >
+                                Comment #{comment.id}
+                            </span>
+                            <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                style={{ marginLeft: "10px" }}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                {selectedComment && (
+                    <CommentThread
+                        comment={comments.find((c) => c.id === selectedComment)!}
+                        onAddComment={handleAddMessage}
+                    />
+                )}
             </div>
         </div>
     );
