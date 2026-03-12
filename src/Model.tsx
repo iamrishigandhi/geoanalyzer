@@ -27,30 +27,26 @@ function CenterLines({ color }: { color: string }) {
 
 export default function Model({
     wireframe,
-    onStatsChange,
     color,
+    rotateX,
+    rotateY,
+    rotateZ,
+    speedX,
+    speedY,
+    speedZ,
 }: {
     wireframe: boolean;
-    onStatsChange: (stats: { vertices: number; triangles: number }) => void;
     color: string;
+    rotateX: boolean;
+    rotateY: boolean;
+    rotateZ: boolean;
+    speedX: number;
+    speedY: number;
+    speedZ: number;
 }) {
     const meshRef = useRef<THREE.Mesh>(null!);
 
     const geometry = useMemo(() => new THREE.BoxGeometry(2, 2, 2), []);
-
-    useEffect(() => {
-        if (meshRef.current) {
-            const geo = meshRef.current.geometry;
-            const totalVertices = geo.attributes.position.count;
-            const totalTriangles = geo.index
-                ? geo.index.count / 3
-                : totalVertices / 3;
-            onStatsChange({
-                vertices: totalVertices,
-                triangles: Math.round(totalTriangles),
-            });
-        }
-    }, [geometry, onStatsChange]);
 
     useEffect(() => {
         if (meshRef.current) {
@@ -62,7 +58,15 @@ export default function Model({
 
     useFrame((_state, delta) => {
         if (meshRef.current) {
-            meshRef.current.rotation.y += delta;
+            if (rotateX) {
+                meshRef.current.rotation.x += delta * speedX;
+            }
+            if (rotateY) {
+                meshRef.current.rotation.y += delta * speedY;
+            }
+            if (rotateZ) {
+                meshRef.current.rotation.z += delta * speedZ;
+            }
         }
     });
 
@@ -76,8 +80,8 @@ export default function Model({
                 />
                 {wireframe && (
                     <>
-                        <Edges color="white" lineWidth={15} />
-                        <CenterLines color="white" />
+                        <Edges color="black" lineWidth={15} />
+                        <CenterLines color="black" />
                     </>
                 )}
             </mesh>

@@ -6,8 +6,14 @@ import { useState } from "react";
 
 export default function App() {
     const [wireframe, setWireframe] = useState(true);
-    const [stats, setStats] = useState({ vertices: 0, triangles: 0 });
     const [color, setColor] = useState("#000CB3");
+    const [rotateX, setRotateX] = useState(false);
+    const [rotateY, setRotateY] = useState(true);
+    const [rotateZ, setRotateZ] = useState(false);
+    const [speedX, setSpeedX] = useState(1);
+    const [speedY, setSpeedY] = useState(1);
+    const [speedZ, setSpeedZ] = useState(1);
+    const [lightIntensity, setLightIntensity] = useState(1.5);
 
     return (
         <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
@@ -43,13 +49,18 @@ export default function App() {
                         background: "transparent",
                     }}
                 >
-                    <ambientLight intensity={1.5} />
-                    <directionalLight position={[5, 5, 5]} intensity={4} />
+                    <ambientLight intensity={lightIntensity} />
+                    <directionalLight position={[5, 5, 5]} intensity={lightIntensity * 2.66} />
 
                     <Model
                         wireframe={wireframe}
-                        onStatsChange={(newStats) => setStats(newStats)}
                         color={color}
+                        rotateX={rotateX}
+                        rotateY={rotateY}
+                        rotateZ={rotateZ}
+                        speedX={speedX}
+                        speedY={speedY}
+                        speedZ={speedZ}
                     />
 
                     <OrbitControls />
@@ -86,9 +97,61 @@ export default function App() {
                 </div>
 
                 <div style={{ marginTop: "20px" }}>
-                    <h2>Stats</h2>
-                    <div>Vertices: {stats.vertices}</div>
-                    <div>Triangles: {stats.triangles}</div>
+                    <h3>Rotation</h3>
+                    <button onClick={() => setRotateX(!rotateX)}>
+                        Toggle X Rotation ({rotateX ? "On" : "Off"})
+                    </button>
+                    <input
+                        type="range"
+                        min="-10"
+                        max="10"
+                        step="0.1"
+                        value={speedX}
+                        onChange={(e) => setSpeedX(parseFloat(e.target.value))}
+                    />
+                    <span>{speedX}</span>
+                </div>
+                <div>
+                    <button onClick={() => setRotateY(!rotateY)}>
+                        Toggle Y Rotation ({rotateY ? "On" : "Off"})
+                    </button>
+                    <input
+                        type="range"
+                        min="-10"
+                        max="10"
+                        step="0.1"
+                        value={speedY}
+                        onChange={(e) => setSpeedY(parseFloat(e.target.value))}
+                    />
+                    <span>{speedY}</span>
+                </div>
+                <div>
+                    <button onClick={() => setRotateZ(!rotateZ)}>
+                        Toggle Z Rotation ({rotateZ ? "On" : "Off"})
+                    </button>
+                    <input
+                        type="range"
+                        min="-10"
+                        max="10"
+                        step="0.1"
+                        value={speedZ}
+                        onChange={(e) => setSpeedZ(parseFloat(e.target.value))}
+                    />
+                    <span>{speedZ}</span>
+                </div>
+
+                <div style={{ marginTop: "20px" }}>
+                    <h3>Lighting</h3>
+                    <label>Intensity: </label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        value={lightIntensity}
+                        onChange={(e) => setLightIntensity(parseFloat(e.target.value))}
+                    />
+                    <span>{lightIntensity}</span>
                 </div>
             </div>
         </div>
