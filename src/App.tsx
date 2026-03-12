@@ -6,6 +6,17 @@ import { useState } from "react";
 import * as THREE from "three";
 import CommentMarker from "./CommentMarker";
 import CommentThread from "./CommentThread";
+import { MeasurementTools } from "./MeasurementTools";
+import { AngleMeasurement, DistanceMeasurement } from "./Measurement";
+import { Point } from "./Points";
+
+type Measurement = {
+    id: number;
+} & (
+    | { type: 'distance'; points: [THREE.Vector3, THREE.Vector3]; distance: number }
+    | { type: 'angle'; points: [THREE.Vector3, THREE.Vector3, THREE.Vector3]; angle: number }
+);
+
 
 export default function App() {
     const [wireframe, setWireframe] = useState(true);
@@ -27,16 +38,44 @@ export default function App() {
         }[]
     >([]);
     const [selectedComment, setSelectedComment] = useState<number | null>(null);
+    const [activeTool, setActiveTool] = useState<'none' | 'distance' | 'angle' | 'comment'>('none');
+    const [points, setPoints] = useState<THREE.Vector3[]>([]);
+    const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
     const handleAddComment = (position: THREE.Vector3, normal: THREE.Vector3) => {
-        const newComment = {
-            id: comments.length + 1,
-            position,
-            normal,
-            messages: [],
-        };
-        setComments([...comments, newComment]);
-        setSelectedComment(newComment.id);
+        if (activeTool === 'distance') {
+            const newPoints = [...points, position];
+            if (newPoints.length === 2) {
+                const distance = newPoints[0].distanceTo(newPoints[1]);
+                setMeasurements([...measurements, { id: measurements.length + 1, type: 'distance', points: newPoints as [THREE.Vector3, THREE.Vector3], distance }]);
+                setPoints([]);
+                setActiveTool('none');
+            } else {
+                setPoints(newPoints);
+            }
+        } else if (activeTool === 'angle') {
+            const newPoints = [...points, position];
+            if (newPoints.length === 3) {
+                const v1 = newPoints[0].clone().sub(newPoints[1]).normalize();
+                const v2 = newPoints[2].clone().sub(newPoints[1]).normalize();
+                const angle = v1.angleTo(v2) * (180 / Math.PI);
+                setMeasurements([...measurements, { id: measurements.length + 1, type: 'angle', points: newPoints as [THREE.Vector3, THREE.Vector3, THREE.Vector3], angle }]);
+                setPoints([]);
+                setActiveTool('none');
+            } else {
+                setPoints(newPoints);
+            }
+        } else if (activeTool === 'comment') {
+            const newComment = {
+                id: comments.length + 1,
+                position,
+                normal,
+                messages: [],
+            };
+            setComments([...comments, newComment]);
+            setSelectedComment(newComment.id);
+            setActiveTool('none');
+        }
     };
 
     const handleAddMessage = (commentId: number, message: string) => {
@@ -91,7 +130,7 @@ export default function App() {
                     }}
                 >
                     <ambientLight intensity={lightIntensity} />
-                    <directionalLight position={[5, 5, 5]} intensity={lightIntensity * 3} />
+                    <directionalLight position={[5, 5, 5]} intensity={lightIntensity * 2.66} />
 
                     <Model
                         wireframe={wireframe}
@@ -115,6 +154,20 @@ export default function App() {
                         />
                     ))}
 
+                    {points.map((point, index) => (
+                        <Point key={index} position={point} />
+                    ))}
+
+                    {measurements.map((measurement) => {
+                        if (measurement.type === 'distance') {
+                            return <DistanceMeasurement key={measurement.id} points={measurement.points} distance={measurement.distance} />;
+                        }
+                        if (measurement.type === 'angle') {
+                            return <AngleMeasurement key={measurement.id} points={measurement.points} angle={measurement.angle} />;
+                        }
+                        return null;
+                    })}
+
                     <OrbitControls />
                 </Canvas>
             </div>
@@ -133,7 +186,15 @@ export default function App() {
 
                 <button
                     onClick={() => setWireframe(!wireframe)}
-                    style={{ padding: "6px 12px", fontSize: "14px" }}
+                    style={{
+                        padding: '6px 12px',
+                        fontSize: '14px',
+                        backgroundColor: '#333',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                    }}
                 >
                     Toggle Wireframe
                 </button>
@@ -151,7 +212,18 @@ export default function App() {
 
                 <div style={{ marginTop: "20px" }}>
                     <h3>Rotation</h3>
-                    <button onClick={() => setRotateX(!rotateX)}>
+                    <button
+                        onClick={() => setRotateX(!rotateX)}
+                        style={{
+                            padding: '6px 12px',
+                            fontSize: '14px',
+                            backgroundColor: rotateX ? '#007bff' : '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                        }}
+                    >
                         Toggle X Rotation ({rotateX ? "On" : "Off"})
                     </button>
                     <input
@@ -165,7 +237,18 @@ export default function App() {
                     <span>{speedX}</span>
                 </div>
                 <div>
-                    <button onClick={() => setRotateY(!rotateY)}>
+                    <button
+                        onClick={() => setRotateY(!rotateY)}
+                        style={{
+                            padding: '6px 12px',
+                            fontSize: '14px',
+                            backgroundColor: rotateY ? '#007bff' : '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                        }}
+                    >
                         Toggle Y Rotation ({rotateY ? "On" : "Off"})
                     </button>
                     <input
@@ -179,7 +262,18 @@ export default function App() {
                     <span>{speedY}</span>
                 </div>
                 <div>
-                    <button onClick={() => setRotateZ(!rotateZ)}>
+                    <button
+                        onClick={() => setRotateZ(!rotateZ)}
+                        style={{
+                            padding: '6px 12px',
+                            fontSize: '14px',
+                            backgroundColor: rotateZ ? '#007bff' : '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                        }}
+                    >
                         Toggle Z Rotation ({rotateZ ? "On" : "Off"})
                     </button>
                     <input
@@ -206,8 +300,31 @@ export default function App() {
                     />
                     <span>{lightIntensity}</span>
                 </div>
+                <MeasurementTools
+                    activeTool={activeTool}
+                    onToolChange={setActiveTool}
+                    onClear={() => {
+                        setMeasurements([]);
+                        setPoints([]);
+                    }}
+                />
                 <div style={{ marginTop: "20px" }}>
                     <h3>Comments</h3>
+                    <button
+                        onClick={() => setActiveTool(activeTool === 'comment' ? 'none' : 'comment')}
+                        style={{
+                            padding: '6px 12px',
+                            fontSize: '14px',
+                            backgroundColor: activeTool === 'comment' ? '#007bff' : '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginBottom: '10px',
+                        }}
+                    >
+                        {activeTool === 'comment' ? 'Cancel' : 'Add Comment'}
+                    </button>
                     {comments.map((comment) => (
                         <div key={comment.id} style={{ marginBottom: "10px" }}>
                             <span
@@ -218,7 +335,16 @@ export default function App() {
                             </span>
                             <button
                                 onClick={() => handleDeleteComment(comment.id)}
-                                style={{ marginLeft: "10px" }}
+                                style={{
+                                    padding: '6px 12px',
+                                    fontSize: '14px',
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    marginLeft: '10px',
+                                }}
                             >
                                 Delete
                             </button>
