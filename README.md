@@ -1,73 +1,47 @@
-# React + TypeScript + Vite
+# GeoAnalyzer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+GeoAnalyzer is an interactive 3D model viewer with features for collaboration and analysis inspired by the product made by CoLab Software. It allows users to inspect 3D models, add comments, and take measurements.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **3D Model Viewer:** Render and interact with 3D models in the browser.
+  - **Wireframe Mode:** Toggle between solid and wireframe rendering.
+  - **Color Picker:** Change the color of the 3D model.
+- **Model Rotation:**
+  - Independently rotate the model on the X, Y, and Z axes.
+  - Control the speed of rotation for each axis.
+- **Lighting Control:** Adjust the intensity of the ambient and directional lights in the scene.
+- **Commenting System:**
+  - Place comment markers on the 3D model.
+  - Add messages to comment threads.
+  - Delete comments.
+- **Measurement Tools:**
+  - **Distance Measurement:** Measure the distance between two points on the model.
+  - **Angle Measurement:** Measure the angle formed by three points on the model.
+- **Interactive Background:** An animated background of floating lines that responds to mouse movement.
 
-## React Compiler
+## Skills Demonstrated
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This project demonstrates a wide range of skills in modern web development and 3D graphics:
 
-## Expanding the ESLint configuration
+- **React:** The application's UI is built with React, using functional components and hooks for state management.
+- **Three.js & @react-three/fiber:** The 3D rendering is powered by Three.js, with `@react-three/fiber` used as a React renderer for Three.js. This allows for a declarative and component-based approach to building the 3D scene.
+- **@react-three/drei:** This library provides useful helpers and abstractions for `@react-three/fiber`, such as `OrbitControls`.
+- **TypeScript:** The entire codebase is written in TypeScript, providing static typing for improved code quality and maintainability.
+- **Geometry and Vector Math:** The measurement tools feature required calculations with vectors and geometry to determine distances and angles in 3D space.
+- **Interactive UI/UX:** The application features a responsive UI with interactive tools and controls, providing a seamless user experience.
+- **State Management:** Complex application state, including comments, measurements, and tool states, is managed effectively using React's `useState` hook.
+- **Vite:** The project is built and served using Vite, a modern and fast build tool for web development.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1.  Clone the repository.
+2.  Install the dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+4.  Open your browser and navigate to the local URL provided by Vite.

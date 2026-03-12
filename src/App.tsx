@@ -99,6 +99,7 @@ export default function App() {
         <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
             {/* 3D VIEW AREA */}
             <div style={{ flex: 3, position: "relative" }}>
+                <div style={{ position: 'absolute', top: 10, left: 10, color: 'white', zIndex: 2, fontWeight: 'bold', fontSize: '2em' }}>COLAB</div>
                 {/* FloatingLines Background */}
                 <div
                     style={{
