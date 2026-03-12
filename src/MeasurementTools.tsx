@@ -4,6 +4,11 @@ interface MeasurementToolsProps {
     onClear: () => void;
 }
 
+/**
+ * A component that provides UI controls for the measurement tools.
+ * @param {MeasurementToolsProps} props - The component's props.
+ * @returns {JSX.Element} A div element containing the measurement tools.
+ */
 export function MeasurementTools({
     activeTool,
     onToolChange,

@@ -1,6 +1,13 @@
 import { useState } from "react";
 import * as THREE from "three";
 
+/**
+ * A component that displays a comment thread and allows users to add new messages.
+ * @param {object} props - The component's props.
+ * @param {object} props.comment - The comment object, containing its ID, position, normal, and messages.
+ * @param {(commentId: number, message: string) => void} props.onAddComment - The function to call when a new message is added.
+ * @returns {JSX.Element} A div element containing the comment thread.
+ */
 export default function CommentThread({
     comment,
     onAddComment,
@@ -13,8 +20,13 @@ export default function CommentThread({
     };
     onAddComment: (commentId: number, message: string) => void;
 }) {
+    // State for the new message input field
     const [newMessage, setNewMessage] = useState("");
 
+    /**
+     * Handles the click on the "Add" button.
+     * It calls the onAddComment function with the new message and clears the input field.
+     */
     const handleAddComment = () => {
         if (newMessage.trim() !== "") {
             onAddComment(comment.id, newMessage);

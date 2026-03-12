@@ -3,6 +3,12 @@ import * as THREE from "three";
 import { Edges, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
+/**
+ * A component that renders the center lines of the 3D model.
+ * @param {object} props - The component's props.
+ * @param {string} props.color - The color of the lines.
+ * @returns {JSX.Element} A Three.js group containing the center lines.
+ */
 function CenterLines({ color }: { color: string }) {
     const lines = useMemo(() => {
         const points = [
@@ -25,6 +31,12 @@ function CenterLines({ color }: { color: string }) {
     );
 }
 
+/**
+ * A component that renders the 3D model.
+ * It handles the model's appearance, rotation, and click events for adding comments.
+ * @param {object} props - The component's props.
+ * @returns {JSX.Element} A Three.js group containing the 3D model.
+ */
 export default function Model({
     wireframe,
     color,
@@ -48,8 +60,10 @@ export default function Model({
 }) {
     const meshRef = useRef<THREE.Mesh>(null!);
 
+    // Create the geometry for the model once.
     const geometry = useMemo(() => new THREE.BoxGeometry(2, 2, 2), []);
 
+    // Update the model's color when the color prop changes.
     useEffect(() => {
         if (meshRef.current) {
             (meshRef.current.material as THREE.MeshStandardMaterial).color.set(
@@ -58,6 +72,7 @@ export default function Model({
         }
     }, [color]);
 
+    // Rotate the model on every frame if rotation is enabled.
     useFrame((_state, delta) => {
         if (meshRef.current) {
             if (rotateX) {
@@ -72,6 +87,11 @@ export default function Model({
         }
     });
 
+    /**
+     * Handles clicks on the model.
+     * It calls the onAddComment function with the position and normal of the click.
+     * @param {object} event - The click event.
+     */
     const handleClick = (event: any) => {
         if (event.face) {
             const position = event.point;

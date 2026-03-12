@@ -13,79 +13,96 @@ import {
 
 import "./FloatingLines.css";
 
+// Vertex shader for the floating lines effect.
+// It positions the vertices of the plane geometry.
 const vertexShader = `
 precision highp float;
 
 void main() {
-gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  // Project the vertex position into screen space.
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
+// Fragment shader for the floating lines effect.
+// It calculates the color of each pixel on the plane geometry to create the animated lines.
 const fragmentShader = `
 precision highp float;
 
+// Uniforms for time, resolution, and animation speed.
 uniform float iTime;
 uniform vec3  iResolution;
 uniform float animationSpeed;
 
+// Uniforms to enable or disable different wave layers.
 uniform bool enableTop;
 uniform bool enableMiddle;
 uniform bool enableBottom;
 
+// Uniforms for the number of lines in each layer.
 uniform int topLineCount;
 uniform int middleLineCount;
 uniform int bottomLineCount;
 
+// Uniforms for the distance between lines in each layer.
 uniform float topLineDistance;
 uniform float middleLineDistance;
 uniform float bottomLineDistance;
 
+// Uniforms for the position and rotation of each wave layer.
 uniform vec3 topWavePosition;
 uniform vec3 middleWavePosition;
 uniform vec3 bottomWavePosition;
 
+// Uniforms for interactivity (mouse position, bend effect).
 uniform vec2 iMouse;
 uniform bool interactive;
 uniform float bendRadius;
 uniform float bendStrength;
 uniform float bendInfluence;
 
+// Uniforms for the parallax effect.
 uniform bool parallax;
 uniform float parallaxStrength;
 uniform vec2 parallaxOffset;
 
+// Uniforms for the line color gradient.
 uniform vec3 lineGradient[8];
 uniform int lineGradientCount;
 
+// Predefined colors.
 const vec3 BLACK = vec3(0.0);
 const vec3 PINK  = vec3(233.0, 71.0, 245.0) / 255.0;
 const vec3 BLUE  = vec3(47.0,  75.0, 162.0) / 255.0;
 
+// Function to rotate a 2D vector.
 mat2 rotate(float r) {
-return mat2(cos(r), sin(r), -sin(r), cos(r));
+  return mat2(cos(r), sin(r), -sin(r), cos(r));
 }
 
+// Function to calculate the background color.
 vec3 background_color(vec2 uv) {
-vec3 col = vec3(0.0);
+  vec3 col = vec3(0.0);
 
-float y = sin(uv.x - 0.2) * 0.3 - 0.1;
-float m = uv.y - y;
+  float y = sin(uv.x - 0.2) * 0.3 - 0.1;
+  float m = uv.y - y;
 
-col += mix(BLUE, BLACK, smoothstep(0.0, 1.0, abs(m)));
-col += mix(PINK, BLACK, smoothstep(0.0, 1.0, abs(m - 0.8)));
-return col * 0.5;
+  col += mix(BLUE, BLACK, smoothstep(0.0, 1.0, abs(m)));
+  col += mix(PINK, BLACK, smoothstep(0.0, 1.0, abs(m - 0.8)));
+  return col * 0.5;
 }
 
+// Function to get the line color from a gradient.
 vec3 getLineColor(float t, vec3 baseColor) {
-if (lineGradientCount <= 0) {
+  if (lineGradientCount <= 0) {
     return baseColor;
-}
+  }
 
-vec3 gradientColor;
+  vec3 gradientColor;
 
-if (lineGradientCount == 1) {
+  if (lineGradientCount == 1) {
     gradientColor = lineGradient[0];
-} else {
+  } else {
     float clampedT = clamp(t, 0.0, 0.9999);
     float scaled = clampedT * float(lineGradientCount - 1);
     int idx = int(floor(scaled));
@@ -96,48 +113,54 @@ if (lineGradientCount == 1) {
     vec3 c2 = lineGradient[idx2];
     
     gradientColor = mix(c1, c2, f);
+  }
+
+  return gradientColor * 0.5;
 }
 
-return gradientColor * 0.5;
-}
-
+// Function to calculate a single wave.
 float wave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) {
-float time = iTime * animationSpeed;
+  float time = iTime * animationSpeed;
 
-float x_offset   = offset;
-float x_movement = time * 0.1;
-float amp        = sin(offset + time * 0.2) * 0.3;
-float y          = sin(uv.x + x_offset + x_movement) * amp;
+  float x_offset   = offset;
+  float x_movement = time * 0.1;
+  float amp        = sin(offset + time * 0.2) * 0.3;
+  float y          = sin(uv.x + x_offset + x_movement) * amp;
 
-if (shouldBend) {
+  // Apply bend effect based on mouse position.
+  if (shouldBend) {
     vec2 d = screenUv - mouseUv;
     float influence = exp(-dot(d, d) * bendRadius); // radial falloff around cursor
     float bendOffset = (mouseUv.y - screenUv.y) * influence * bendStrength * bendInfluence;
     y += bendOffset;
+  }
+
+  float m = uv.y - y;
+  return 0.0175 / max(abs(m) + 0.01, 1e-3) + 0.01;
 }
 
-float m = uv.y - y;
-return 0.0175 / max(abs(m) + 0.01, 1e-3) + 0.01;
-}
-
+// Main image function to compose the final color.
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-vec2 baseUv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
-baseUv.y *= -1.0;
+  // Normalize fragment coordinates.
+  vec2 baseUv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
+  baseUv.y *= -1.0;
 
-if (parallax) {
+  // Apply parallax effect.
+  if (parallax) {
     baseUv += parallaxOffset;
-}
+  }
 
-vec3 col = vec3(0.0);
+  vec3 col = vec3(0.0);
 
-vec3 b = lineGradientCount > 0 ? vec3(0.0) : background_color(baseUv);
+  vec3 b = lineGradientCount > 0 ? vec3(0.0) : background_color(baseUv);
 
-vec2 mouseUv = vec2(0.0);
-if (interactive) {
+  vec2 mouseUv = vec2(0.0);
+  if (interactive) {
     mouseUv = (2.0 * iMouse - iResolution.xy) / iResolution.y;
     mouseUv.y *= -1.0;
     }
     
+    // Render bottom wave layer.
     if (enableBottom) {
         for (int i = 0; i < bottomLineCount; ++i) {
             float fi = float(i);
@@ -156,6 +179,7 @@ if (interactive) {
     }
     }
 
+    // Render middle wave layer.
     if (enableMiddle) {
         for (int i = 0; i < middleLineCount; ++i) {
             float fi = float(i);
@@ -174,6 +198,7 @@ if (interactive) {
     }
     }
 
+    // Render top wave layer.
     if (enableTop) {
     for (int i = 0; i < topLineCount; ++i) {
         float fi = float(i);
@@ -196,6 +221,7 @@ if (interactive) {
     fragColor = vec4(col, 1.0);
 }
 
+// Main entry point for the fragment shader.
 void main() {
     vec4 color = vec4(0.0);
     mainImage(color, gl_FragCoord.xy);
@@ -205,6 +231,11 @@ void main() {
 
 const MAX_GRADIENT_STOPS = 8;
 
+/**
+ * Converts a hex color string to a THREE.Vector3.
+ * @param {string} hex - The hex color string (e.g., "#ff0000").
+ * @returns {THREE.Vector3} The color as a THREE.Vector3.
+ */
 function hexToVec3(hex: string) {
     let value = hex.trim();
 
@@ -247,6 +278,11 @@ interface FloatingLinesProps {
     mixBlendMode?: any;
 }
 
+/**
+ * A component that renders an animated background of floating lines using Three.js and GLSL shaders.
+ * @param {FloatingLinesProps} props - The component's props.
+ * @returns {JSX.Element} A div element that contains the canvas for the floating lines.
+ */
 export default function FloatingLines({
     linesGradient,
     enabledWaves = ["top", "middle", "bottom"],
@@ -272,6 +308,7 @@ export default function FloatingLines({
     const targetParallaxRef = useRef(new Vector2(0, 0));
     const currentParallaxRef = useRef(new Vector2(0, 0));
 
+    // Helper functions to get line count and distance for each wave type.
     const getLineCount = (waveType: "top" | "middle" | "bottom") => {
         if (typeof lineCount === "number") return lineCount;
         if (!enabledWaves.includes(waveType)) return 0;
@@ -286,6 +323,7 @@ export default function FloatingLines({
         return lineDistance[index] ?? 0.1;
     };
 
+    // Calculate line counts and distances for each wave layer.
     const topLineCount = enabledWaves.includes("top") ? getLineCount("top") : 0;
     const middleLineCount = enabledWaves.includes("middle")
         ? getLineCount("middle")
@@ -308,6 +346,7 @@ export default function FloatingLines({
         if (!containerRef.current) return;
         const container = containerRef.current as any;
 
+        // Set up Three.js scene, camera, and renderer.
         const scene = new Scene();
 
         const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -319,6 +358,7 @@ export default function FloatingLines({
         renderer.domElement.style.height = "100%";
         container.appendChild(renderer.domElement);
 
+        // Define shader uniforms.
         const uniforms = {
             iTime: { value: 0 },
             iResolution: { value: new Vector3(1, 1, 1) },
@@ -377,6 +417,7 @@ export default function FloatingLines({
             lineGradientCount: { value: 0 },
         };
 
+        // Set up line color gradient from props.
         if (linesGradient && linesGradient.length > 0) {
             const stops = linesGradient.slice(0, MAX_GRADIENT_STOPS);
             uniforms.lineGradientCount.value = stops.length;
@@ -387,6 +428,7 @@ export default function FloatingLines({
             });
         }
 
+        // Create shader material, geometry, and mesh.
         const material = new ShaderMaterial({
             uniforms,
             vertexShader,
@@ -399,6 +441,7 @@ export default function FloatingLines({
 
         const clock = new Clock();
 
+        // Handle window resizing.
         const setSize = () => {
             const el = containerRef.current as any;
             const width = el.clientWidth || 1;
@@ -422,6 +465,7 @@ export default function FloatingLines({
             ro.observe(container);
         }
 
+        // Handle mouse movement for interactivity and parallax.
         const handlePointerMove = (event: any) => {
             const rect = renderer.domElement.getBoundingClientRect();
             const x = event.clientX - rect.left;
@@ -458,10 +502,12 @@ export default function FloatingLines({
             );
         }
 
+        // Render loop.
         let raf = 0;
         const renderLoop = () => {
             uniforms.iTime.value = clock.getElapsedTime();
 
+            // Animate mouse position and influence for smooth interaction.
             if (interactive) {
                 currentMouseRef.current.lerp(
                     targetMouseRef.current,
@@ -475,6 +521,7 @@ export default function FloatingLines({
                 uniforms.bendInfluence.value = currentInfluenceRef.current;
             }
 
+            // Animate parallax offset.
             if (parallax) {
                 currentParallaxRef.current.lerp(
                     targetParallaxRef.current,
@@ -488,6 +535,7 @@ export default function FloatingLines({
         };
         renderLoop();
 
+        // Clean up on component unmount.
         return () => {
             cancelAnimationFrame(raf);
             if (ro && container) {

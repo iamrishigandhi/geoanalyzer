@@ -25,17 +25,27 @@ type Measurement = {
       }
 );
 
+/**
+ * The main application component.
+ * It sets up the 3D scene, UI controls, and manages the application's state.
+ */
 export default function App() {
+    // State for the 3D model's appearance
     const [wireframe, setWireframe] = useState(true);
     const [color, setColor] = useState("#000CB3");
+
+    // State for the 3D model's rotation
     const [rotateX, setRotateX] = useState(false);
     const [rotateY, setRotateY] = useState(false);
     const [rotateZ, setRotateZ] = useState(false);
     const [speedX, setSpeedX] = useState(1);
     const [speedY, setSpeedY] = useState(1);
     const [speedZ, setSpeedZ] = useState(1);
+
+    // State for the scene's lighting
     const [lightIntensity, setLightIntensity] = useState(1.5);
 
+    // State for the commenting feature
     const [comments, setComments] = useState<
         {
             id: number;
@@ -45,12 +55,20 @@ export default function App() {
         }[]
     >([]);
     const [selectedComment, setSelectedComment] = useState<number | null>(null);
+
+    // State for the measurement tools
     const [activeTool, setActiveTool] = useState<
         "none" | "distance" | "angle" | "comment"
     >("none");
     const [points, setPoints] = useState<THREE.Vector3[]>([]);
     const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
+    /**
+     * Handles clicks on the 3D model.
+     * Depending on the active tool, it can add a comment, a measurement point, or complete a measurement.
+     * @param {THREE.Vector3} position - The position of the click in 3D space.
+     * @param {THREE.Vector3} normal - The normal of the face that was clicked.
+     */
     const handleAddComment = (
         position: THREE.Vector3,
         normal: THREE.Vector3,
@@ -110,6 +128,11 @@ export default function App() {
         }
     };
 
+    /**
+     * Adds a message to a comment thread.
+     * @param {number} commentId - The ID of the comment to add the message to.
+     * @param {string} message - The message to add.
+     */
     const handleAddMessage = (commentId: number, message: string) => {
         setComments(
             comments.map((comment) =>
@@ -120,6 +143,10 @@ export default function App() {
         );
     };
 
+    /**
+     * Deletes a comment.
+     * @param {number} commentId - The ID of the comment to delete.
+     */
     const handleDeleteComment = (commentId: number) => {
         setComments(comments.filter((comment) => comment.id !== commentId));
         if (selectedComment === commentId) {
@@ -174,12 +201,14 @@ export default function App() {
                         background: "transparent",
                     }}
                 >
+                    {/* Lighting */}
                     <ambientLight intensity={lightIntensity} />
                     <directionalLight
                         position={[5, 5, 5]}
                         intensity={lightIntensity * 2.66}
                     />
 
+                    {/* 3D Model */}
                     <Model
                         wireframe={wireframe}
                         color={color}
@@ -192,6 +221,7 @@ export default function App() {
                         onAddComment={handleAddComment}
                     />
 
+                    {/* Comment Markers */}
                     {comments.map((comment) => (
                         <CommentMarker
                             key={comment.id}
@@ -202,10 +232,12 @@ export default function App() {
                         />
                     ))}
 
+                    {/* Measurement Points */}
                     {points.map((point, index) => (
                         <Point key={index} position={point} />
                     ))}
 
+                    {/* Measurement Visualizations */}
                     {measurements.map((measurement) => {
                         if (measurement.type === "distance") {
                             return (
@@ -228,6 +260,7 @@ export default function App() {
                         return null;
                     })}
 
+                    {/* Camera Controls */}
                     <OrbitControls />
                 </Canvas>
             </div>
@@ -244,6 +277,7 @@ export default function App() {
             >
                 <h2>Controls</h2>
 
+                {/* Wireframe Toggle */}
                 <button
                     onClick={() => setWireframe(!wireframe)}
                     style={{
@@ -259,6 +293,7 @@ export default function App() {
                     Toggle Wireframe
                 </button>
 
+                {/* Color Picker */}
                 <div style={{ marginTop: "10px" }}>
                     <label htmlFor="color-picker">Color:</label>
                     <input
@@ -270,6 +305,7 @@ export default function App() {
                     />
                 </div>
 
+                {/* Rotation Controls */}
                 <div style={{ marginTop: "20px" }}>
                     <h3>Rotation</h3>
                     <button
@@ -347,6 +383,7 @@ export default function App() {
                     <span>{speedZ}</span>
                 </div>
 
+                {/* Lighting Controls */}
                 <div style={{ marginTop: "20px" }}>
                     <h3>Lighting</h3>
                     <label>Intensity: </label>
@@ -362,6 +399,8 @@ export default function App() {
                     />
                     <span>{lightIntensity}</span>
                 </div>
+
+                {/* Measurement Tools */}
                 <MeasurementTools
                     activeTool={activeTool}
                     onToolChange={setActiveTool}
@@ -370,6 +409,8 @@ export default function App() {
                         setPoints([]);
                     }}
                 />
+
+                {/* Comments Section */}
                 <div style={{ marginTop: "20px" }}>
                     <h3>Comments</h3>
                     <button
@@ -419,6 +460,7 @@ export default function App() {
                     ))}
                 </div>
 
+                {/* Comment Thread */}
                 {selectedComment && (
                     <CommentThread
                         comment={
@@ -431,3 +473,4 @@ export default function App() {
         </div>
     );
 }
+
